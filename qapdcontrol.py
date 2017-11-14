@@ -5,7 +5,13 @@ import tkFont
 import string
 import numpy as np
 
-data = np.empty(shape=[0,2])
+data = np.empty(shape=[0,3])
+
+fb_initialBias = -275
+fb_slope = -9.57
+fb_percent = .25
+fb_nominalTemp = 3.0752
+fb_bias = fb_initialBias + fb_slope*fb_percent*(DAQC.getADC(0,0)-fb_nominalTemp)
 
 class titleBLOCK:
 	def __init__(self, master, r, c):
@@ -93,7 +99,7 @@ class biasBLOCK:
                 self.heading1.grid(row=1,column=0)
 		self.instructions = Label(self.bm, text="Input range from -300 to -50", padx=4, pady=4).grid(row=2, column=0)
                 self.voltage = DoubleVar()
-                self.voltage.set(-300)
+                self.voltage.set(-275)
 		self.voltageSet = Entry(self.bm, textvariable=self.voltage, width=5)
                 #self.voltageSet = Scale(self.bm,variable=self.voltage, from_=-300, to=-60, resolution=1, width=30, length=240)
                 #self.voltageSet.bind("<ButtonRelease-1>", self.vdelta)
@@ -110,7 +116,9 @@ class biasBLOCK:
                 self.labelc.grid(row=2,column=1,sticky=N+E+W+S)
                 self.switch.grid(row=3,column=1,sticky=N+E+W+S)
 
-		##update voltage button
+                ##FB Switch
+                self.fb_button = Button(self.bm, text = "Feedback Mode", command=self.fbMode).grid(row=5, column=0)
+                ##update voltage button
 		self.update_button = Button(self.bm, text = "Update", command=self.vdelta).grid(row=4,column=0)
 
         ##update output bias voltage
@@ -123,6 +131,10 @@ class biasBLOCK:
                 else:
                         DAQC.setDAC(0,1,0)
                 print "bias V:", DAQC.getDAC(0,1)
+
+        def fbMode(self):
+                self.voltage.set(fb_bias)
+                root.after(500, self.fbMode)
 
 class voltageDisplay:
 	def __init__(self,master,title,channel,r,c):
@@ -239,7 +251,7 @@ class dataLog:
 			for x in range(10):
 				sampleSet[x] = DAQC.getADC(0,self.sumChannel)
 			averageSum = np.mean(sampleSet)
-			data = np.append(data, [[DAQC.getADC(0,self.tempChannel), averageSum]], axis=0)
+			data = np.append(data, [[DAQC.getADC(0,self.tempChannel), averageSum, fb_bias]], axis=0)
 		root.after(self.subInterval.get(), self.logData)
 
 	def saveData(self):
@@ -253,21 +265,10 @@ class dataLog:
 
 	def clearData(self):
 		global data
-		data = np.empty(shape=[0,2])
+		data = np.empty(shape=[0,3])
 		print "data cleared"
 
-class bigDamnButton(Gtk.Window):
-	def __init__(self):
-		Gtk.Window.__init__(self, title="Big Damn Button")
-		self.set_border_width(10)
-		
-		hbox = Gtk.Box(spacing=6)
-		self.add(hbox)
-		
-		button = Gtk.Button.new_with_label("ON")
-		button.connect()
-	def functionSmasher:
-		
+
 	
 root = Tk()
 #root.config(bg="black")
