@@ -99,7 +99,7 @@ class biasBLOCK:
                 self.heading1.grid(row=1,column=0)
 		self.instructions = Label(self.bm, text="Input range from -300 to -50", padx=4, pady=4).grid(row=2, column=0)
                 self.voltage = DoubleVar()
-                self.voltage.set(-275)
+                self.voltage.set(-100)
 		self.voltageSet = Entry(self.bm, textvariable=self.voltage, width=5)
                 #self.voltageSet = Scale(self.bm,variable=self.voltage, from_=-300, to=-60, resolution=1, width=30, length=240)
                 #self.voltageSet.bind("<ButtonRelease-1>", self.vdelta)
